@@ -15,6 +15,7 @@ class VendingMachine
     money_type =[10,50,100,500,1000]
     if money_type.include?(money)
       @slot_money += money
+      puts "#{@slot_money}円を投入しました。"
       puts "現在の投入額#{@slot_money}"
       return @slot_money
     else
@@ -28,6 +29,7 @@ class VendingMachine
     puts "お釣りは#{change}円です。"
     @slot_money = 0
   end
+
   #投入金額を確認
   def confirm_slot_money
     puts "現在の投入額は#{@slot_money}円です。"
@@ -37,12 +39,13 @@ class VendingMachine
   def show_menus
     k=0
     @menus.each do |menu|
-      if @slot_money < menu.price###############ここに入れたよ！
+      if (@slot_money < menu.price) or (menu.stock < 1)
+        puts "#{k}:#{menu.name} #{menu.price}円 在庫#{menu.stock}個 購入不可"
         k +=1
-        next
+      else
+        puts "#{k}:#{menu.name} #{menu.price}円 在庫#{menu.stock}個 購入可能"
+        k +=1
       end
-      puts "#{k}:#{menu.name} #{menu.price}円 在庫#{menu.stock}個"
-      k +=1
     end
   end
 
@@ -50,11 +53,12 @@ class VendingMachine
   def confirm_sales
     puts "今までの売上は#{@sales}円です。"
   end
-  #投入金額とお金と在庫の比較（ここはリファクタリングできそう。最初の条件を最後に置く）
+
+  #投入金額とお金と在庫の比較
   def purchase(menu_number)
     if @slot_money >= @menus[menu_number].price && @menus[menu_number].stock >= 1
       fluctuation(menu_number)
-      puts "#{@menus[menu_number].name}を購入しました。"
+      puts "#{@menus[menu_number].name}を#{@menus[menu_number].price}円で購入しました。"
     elsif @slot_money < @menus[menu_number].price
       puts "投入金額不足です。"
     elsif @menus[menu_number].stock < 1
@@ -105,8 +109,10 @@ end
 
 vm = VendingMachine.new
 
-#在庫
+#初期在庫
 vm.menu_add("コーラ",120,5)
+
+#在庫追加
 vm.menu_add("レッドブル",200,5)
 vm.menu_add("水",100,5)
 
@@ -123,3 +129,9 @@ vm.purchase(1)
 vm.purchase(2)
 vm.confirm_sales
 vm.confirm_slot_money
+vm.menu_add("超神水",1000,1)
+vm.menu_add("Super超神水",100,0)
+vm.show_menus
+vm.purchase(3)
+vm.show_menus
+vm.purchase(3)
